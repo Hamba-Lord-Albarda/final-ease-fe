@@ -62,6 +62,9 @@ export const LoginPage: React.FC = () => {
   return (
     <div className="login-wrapper">
       <div className="login-card">
+        <div className="login-logo">
+        <img src="/Logo.png" alt="FinalEase Logo" className="login-logo-image" />
+        </div>
         <div className="login-header">
           <div>
             <div className="login-title">FinalEase</div>
@@ -158,7 +161,7 @@ export const LoginPage: React.FC = () => {
           </div>
 
           <button className="btn btn-primary" type="submit" disabled={loading}>
-            {loading ? 'Masuk...' : 'Masuk ke dashboard'}
+            {loading ? 'Masuk...' : 'Masuk ke Dashboard'}
           </button>
         </form>
       </div>

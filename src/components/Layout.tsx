@@ -39,7 +39,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="layout app-root">
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <div className="logo-badge">Fe</div>
+          <img src="/Logo.png" alt="FinalEase Logo" className="sidebar-logo-image" />
           <div className="sidebar-title">
             <span className="sidebar-title-main">FinalEase</span>
             <span className="sidebar-title-sub">Submission workflow</span>
