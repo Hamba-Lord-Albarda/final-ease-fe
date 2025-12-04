@@ -67,7 +67,9 @@ export const SubmissionTable: React.FC<Props> = ({
               <th>ID</th>
               {showOwner && <th>Pemilik</th>}
               <th>Judul</th>
+              {showOwner && <th>Deskripsi</th>}
               <th>Status</th>
+              {!showOwner && <th>Alasan Reject</th>}
               <th>File</th>
               <th>Dibuat</th>
               {onApprove && onReject && <th style={{ width: '180px' }}>Aksi</th>}
@@ -76,7 +78,7 @@ export const SubmissionTable: React.FC<Props> = ({
           <tbody>
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={showOwner ? 7 : 6}>
+                <td colSpan={showOwner ? 8 : 7}>
                   <div className="empty-state">
                     Belum ada submission sesuai filter yang dipilih.
                   </div>
@@ -94,9 +96,19 @@ export const SubmissionTable: React.FC<Props> = ({
                   <td>#{s.id}</td>
                   {showOwner && <td>User #{s.userId}</td>}
                   <td>{s.title}</td>
+                  {showOwner && (
+                    <td className="text-muted text-sm" style={{ maxWidth: '200px' }}>
+                      {s.description || '-'}
+                    </td>
+                  )}
                   <td>
                     <StatusBadge status={s.status} />
                   </td>
+                  {!showOwner && (
+                    <td className="text-muted text-sm" style={{ maxWidth: '200px' }}>
+                      {s.status === 'REJECTED' && s.rejectReason ? s.rejectReason : '-'}
+                    </td>
+                  )}
                   <td>
                     <a
                       href={fileUrl}
