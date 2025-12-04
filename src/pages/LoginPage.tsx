@@ -1,15 +1,32 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../modules/auth/AuthContext';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [roleHint, setRoleHint] = useState<'MAHASISWA' | 'DOSEN'>('MAHASISWA');
+
+  // THEME STATE
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window === 'undefined') return 'light';
+    const stored = localStorage.getItem('theme');
+    if (stored === 'light' || stored === 'dark') return stored;
+    const prefersDark = window.matchMedia?.(
+      '(prefers-color-scheme: dark)'
+    ).matches;
+    return prefersDark ? 'dark' : 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,23 +69,48 @@ export const LoginPage: React.FC = () => {
               Portal pengajuan dan approval submission mahasiswa & dosen.
             </div>
           </div>
-          <div className="login-role-toggle">
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-end',
+              gap: '0.5rem',
+            }}
+          >
             <button
               type="button"
-              className={
-                'login-role-button' + (roleHint === 'MAHASISWA' ? ' active' : '')
-              }
-              onClick={() => setRoleHint('MAHASISWA')}
+              className={`theme-toggle theme-toggle--${theme}`}
+              onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+              aria-label="Toggle dark mode"
             >
-              Mahasiswa
+              <div className="theme-toggle-track">
+                <div className="theme-toggle-thumb">
+                  {theme === 'light' ? '☀️' : '🌙'}
+                </div>
+              </div>
             </button>
-            <button
-              type="button"
-              className={'login-role-button' + (roleHint === 'DOSEN' ? ' active' : '')}
-              onClick={() => setRoleHint('DOSEN')}
-            >
-              Dosen
-            </button>
+
+            <div className="login-role-toggle">
+              <button
+                type="button"
+                className={
+                  'login-role-button' +
+                  (roleHint === 'MAHASISWA' ? ' active' : '')
+                }
+                onClick={() => setRoleHint('MAHASISWA')}
+              >
+                Mahasiswa
+              </button>
+              <button
+                type="button"
+                className={
+                  'login-role-button' + (roleHint === 'DOSEN' ? ' active' : '')
+                }
+                onClick={() => setRoleHint('DOSEN')}
+              >
+                Dosen
+              </button>
+            </div>
           </div>
         </div>
 
@@ -109,11 +151,7 @@ export const LoginPage: React.FC = () => {
               >
                 Mahasiswa demo
               </button>
-              <button
-                type="button"
-                className="tag"
-                onClick={useDemoDosen}
-              >
+              <button type="button" className="tag" onClick={useDemoDosen}>
                 Dosen demo
               </button>
             </div>

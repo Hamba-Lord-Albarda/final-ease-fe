@@ -1,6 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../modules/auth/AuthContext';
-import { Submission, SubmissionStatus, fetchSubmissions } from '../api/submissions';
+import {
+  Submission,
+  SubmissionStatus,
+  fetchSubmissions,
+} from '../api/submissions';
 import { SubmissionTable } from '../components/SubmissionTable';
 import { approveSubmission, rejectSubmission } from '../api/process';
 
@@ -9,12 +13,30 @@ export const DashboardDosen: React.FC = () => {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState<SubmissionStatus | 'ALL'>('PENDING');
+  const [filterStatus, setFilterStatus] =
+    useState<SubmissionStatus | 'ALL'>('PENDING');
   const [modalRejectId, setModalRejectId] = useState<number | null>(null);
   const [modalReason, setModalReason] = useState('');
   const [submittingAction, setSubmittingAction] = useState(false);
 
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+  const apiBaseUrl =
+    import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+
+  // THEME STATE
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window === 'undefined') return 'light';
+    const stored = localStorage.getItem('theme');
+    if (stored === 'light' || stored === 'dark') return stored;
+    const prefersDark = window.matchMedia?.(
+      '(prefers-color-scheme: dark)'
+    ).matches;
+    return prefersDark ? 'dark' : 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   const loadSubmissions = async () => {
     try {
@@ -45,7 +67,8 @@ export const DashboardDosen: React.FC = () => {
         .filter((s) => s.status === 'PENDING')
         .sort(
           (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            new Date(b.createdAt).getTime() -
+            new Date(a.createdAt).getTime()
         )
         .slice(0, 3),
     [submissions]
@@ -73,7 +96,10 @@ export const DashboardDosen: React.FC = () => {
     if (!modalRejectId) return;
     try {
       setSubmittingAction(true);
-      await rejectSubmission(modalRejectId, modalReason || 'Tidak ada keterangan');
+      await rejectSubmission(
+        modalRejectId,
+        modalReason || 'Tidak ada keterangan'
+      );
       setModalRejectId(null);
       setModalReason('');
       await loadSubmissions();
@@ -94,19 +120,41 @@ export const DashboardDosen: React.FC = () => {
             Review dan berikan keputusan untuk submission mahasiswa.
           </p>
         </div>
-        <div className="topbar-user">
-          <div className="avatar-circle">
-            {user?.name
-              ?.split(' ')
-              .map((p) => p[0])
-              .join('')
-              .toUpperCase()
-              .slice(0, 2)}
-          </div>
-          <div>
-            <div style={{ fontSize: '0.85rem' }}>{user?.name}</div>
-            <div className="text-muted" style={{ fontSize: '0.75rem' }}>
-              {user?.email}
+
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+          }}
+        >
+          <button
+            type="button"
+            className={`theme-toggle theme-toggle--${theme}`}
+            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            aria-label="Toggle dark mode"
+          >
+            <div className="theme-toggle-track">
+              <div className="theme-toggle-thumb">
+                {theme === 'light' ? '☀️' : '🌙'}
+              </div>
+            </div>
+          </button>
+
+          <div className="topbar-user">
+            <div className="avatar-circle">
+              {user?.name
+                ?.split(' ')
+                .map((p) => p[0])
+                .join('')
+                .toUpperCase()
+                .slice(0, 2)}
+            </div>
+            <div>
+              <div style={{ fontSize: '0.85rem' }}>{user?.name}</div>
+              <div className="text-muted" style={{ fontSize: '0.75rem' }}>
+                {user?.email}
+              </div>
             </div>
           </div>
         </div>
@@ -142,7 +190,9 @@ export const DashboardDosen: React.FC = () => {
           </div>
           <div className="metric-pill-row">
             <span className="metric-pill">Fokus pada submission Pending</span>
-            <span className="metric-pill">Berikan alasan jelas saat reject</span>
+            <span className="metric-pill">
+              Berikan alasan jelas saat reject
+            </span>
           </div>
         </div>
 
@@ -150,25 +200,43 @@ export const DashboardDosen: React.FC = () => {
           <div className="card-header">
             <div>
               <div className="card-title">Pending terbaru</div>
-              <div className="card-subtitle">Tiga submission terbaru yang belum diproses.</div>
+              <div className="card-subtitle">
+                Tiga submission terbaru yang belum diproses.
+              </div>
             </div>
           </div>
           {latestPending.length === 0 ? (
             <div className="empty-state">Belum ada submission pending.</div>
           ) : (
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.85rem' }}>
+            <ul
+              style={{
+                listStyle: 'none',
+                padding: 0,
+                margin: 0,
+                fontSize: '0.85rem',
+              }}
+            >
               {latestPending.map((s) => (
                 <li
                   key={s.id}
                   style={{
                     paddingBlock: '0.4rem',
-                    borderBottom: '1px solid rgba(31, 41, 55, 0.8)'
+                    borderBottom: '1px solid rgba(31, 41, 55, 0.8)',
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                    }}
+                  >
                     <div>
-                      <div>#{s.id} • {s.title}</div>
-                      <div className="text-muted text-sm">User #{s.userId}</div>
+                      <div>
+                        #{s.id} • {s.title}
+                      </div>
+                      <div className="text-muted text-sm">
+                        User #{s.userId}
+                      </div>
                     </div>
                     <div className="text-muted text-sm">
                       {new Date(s.createdAt).toLocaleDateString()}
@@ -206,7 +274,8 @@ export const DashboardDosen: React.FC = () => {
               <div>
                 <div className="card-title">Alasan reject</div>
                 <div className="card-subtitle">
-                  Berikan catatan singkat agar mahasiswa tahu apa yang perlu diperbaiki.
+                  Berikan catatan singkat agar mahasiswa tahu apa yang perlu
+                  diperbaiki.
                 </div>
               </div>
             </div>
@@ -224,7 +293,7 @@ export const DashboardDosen: React.FC = () => {
                 display: 'flex',
                 justifyContent: 'flex-end',
                 gap: '0.5rem',
-                marginTop: '0.75rem'
+                marginTop: '0.75rem',
               }}
             >
               <button

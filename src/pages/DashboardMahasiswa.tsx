@@ -10,7 +10,24 @@ export const DashboardMahasiswa: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+  const apiBaseUrl =
+    import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+
+  // THEME STATE
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window === 'undefined') return 'light';
+    const stored = localStorage.getItem('theme');
+    if (stored === 'light' || stored === 'dark') return stored;
+    const prefersDark = window.matchMedia?.(
+      '(prefers-color-scheme: dark)'
+    ).matches;
+    return prefersDark ? 'dark' : 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   const loadSubmissions = async () => {
     try {
@@ -49,19 +66,43 @@ export const DashboardMahasiswa: React.FC = () => {
             Kelola dan pantau status upload submission tugas atau dokumen kamu.
           </p>
         </div>
-        <div className="topbar-user">
-          <div className="avatar-circle">
-            {user?.name
-              ?.split(' ')
-              .map((p) => p[0])
-              .join('')
-              .toUpperCase()
-              .slice(0, 2)}
-          </div>
-          <div>
-            <div style={{ fontSize: '0.85rem' }}>{user?.name}</div>
-            <div className="text-muted" style={{ fontSize: '0.75rem' }}>
-              {user?.email}
+
+        {/* kanan topbar: toggle + user */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+          }}
+        >
+          {/* TOGGLE DARK/LIGHT */}
+          <button
+            type="button"
+            className={`theme-toggle theme-toggle--${theme}`}
+            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            aria-label="Toggle dark mode"
+          >
+            <div className="theme-toggle-track">
+              <div className="theme-toggle-thumb">
+                {theme === 'light' ? '☀️' : '🌙'}
+              </div>
+            </div>
+          </button>
+
+          <div className="topbar-user">
+            <div className="avatar-circle">
+              {user?.name
+                ?.split(' ')
+                .map((p) => p[0])
+                .join('')
+                .toUpperCase()
+                .slice(0, 2)}
+            </div>
+            <div>
+              <div style={{ fontSize: '0.85rem' }}>{user?.name}</div>
+              <div className="text-muted" style={{ fontSize: '0.75rem' }}>
+                {user?.email}
+              </div>
             </div>
           </div>
         </div>
