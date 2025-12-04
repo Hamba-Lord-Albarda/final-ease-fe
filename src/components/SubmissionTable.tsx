@@ -86,10 +86,15 @@ export const SubmissionTable: React.FC<Props> = ({
               </tr>
             )}
             {filtered.map((s) => {
-              const fileUrl =
+              const isCloudinaryUrl = s.fileStoragePath.includes('cloudinary.com');
+              const rawFileUrl =
                 s.fileStoragePath.startsWith('http') || s.fileStoragePath.startsWith('/uploads')
                   ? s.fileStoragePath
                   : `${apiBaseUrl.replace(/\/$/, '')}/${s.fileStoragePath}`;
+              
+              const fileUrl = isCloudinaryUrl
+                ? `https://docs.google.com/viewer?url=${encodeURIComponent(rawFileUrl)}&embedded=true`
+                : rawFileUrl;
 
               return (
                 <tr key={s.id}>
