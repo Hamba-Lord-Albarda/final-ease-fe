@@ -30,7 +30,20 @@ const App: React.FC = () => {
           }
         />
 
-        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/login"
+          element={
+            user ? (
+              user.role === 'DOSEN' ? (
+                <Navigate to="/dosen/dashboard" replace />
+              ) : (
+                <Navigate to="/mahasiswa/dashboard" replace />
+              )
+            ) : (
+              <LoginPage />
+            )
+          }
+        />
 
         <Route
           path="/mahasiswa/dashboard"
